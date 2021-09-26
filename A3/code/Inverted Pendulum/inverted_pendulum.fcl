@@ -1,0 +1,64 @@
+FUNCTION_BLOCK Inverted_Pendulum
+
+    VAR_INPUT
+        theta : REAL;
+        x_dot : REAL;
+        theta_dot : REAL;
+    END_VAR
+
+    VAR_OUTPUT
+        F : REAL;
+    END_VAR
+
+    FUZZIFY theta
+        TERM Left := (270, 0) (359, 1);
+        TERM Up := (178,0) (180,1) (182,0);
+        TERM UpLeft := (180, 0) (190,1) (200,0)
+        TERM Right := (0, 1) (90, 0);
+        TERM UpRight := (180, 0) (170,1) (160,0)
+    END_FUZZIFY
+
+    FUZZIFY theta_dot
+        TERM CounterclockwiseVeryFast := (4,0) (8,1);
+        TERM CounterclockwiseFast := (1,0) (4,1) (6,0);
+        TERM Counterclockwise := (0.1,0) (1,1) (4,0);
+        TERM Clockwise := (-4,0) (-1,1) (-0.1,0);
+        TERM ClockwiseFast := (-6,0) (-4,1) (-1,0);
+        TERM ClockwiseVeryFast := (-8,1) (-4,0);
+    END_FUZZIFY
+
+    DEFUZZIFY F
+        TERM MoveLeftVeryFast := (-100,1) (-80,0);
+        TERM MoveLeftFast := (-80,0) (-60,1) (-40,0);
+        TERM MoveLeft := (-60,0) (-40,1) (-20,0);
+        TERM MoveLeftSlow := (-40,0) (-20,1) (-10,0);
+        TERM MoveLeftVerySlow := (-20,0) (-10,1) (0,0);
+        TERM MoveRightVerySlow := (0,0) (10,1) (20,0);
+        TERM MoveRightSlow := (10,0) (20,1) (40,0);
+        TERM MoveRight := (20,0) (40,1) (60,0);
+        TERM MoveRightFast := (40,0) (60,1) (80,0);
+        TERM MoveRightVeryFast := (80,0) (100,1);
+        ACCU : MAX;
+        METHOD : COG;
+        DEFAULT := 0;
+    END_DEFUZZIFY
+
+    RULEBLOCK Inverted_Pendulum
+        AND : AlgebraicProduct;
+        OR : MAX;
+
+        RULE 1 : IF theta IS Right AND (theta_dot IS Clockwise OR theta_dot IS ClockwiseFast) THEN F IS MoveRightSlow;
+        RULE 2 : IF theta IS Left AND (theta_dot IS Counterclockwise OR theta_dot IS CounterclockwiseFast)  THEN F IS MoveLeftSlow;
+        RULE 3 : IF theta IS Up AND theta_dot IS Counterclockwise THEN F IS MoveLeft;
+        RULE 4 : IF theta IS Up AND theta_dot IS CounterclockwiseFast THEN F IS MoveLeftFast;
+        RULE 5 : IF theta IS Up AND theta_dot IS CounterclockwiseVeryFast THEN F IS MoveLeftVeryFast;
+        RULE 6 : IF theta IS Up AND theta_dot IS Clockwise THEN F IS MoveRight;
+        RULE 7 : IF theta IS Up AND theta_dot IS ClockwiseFast THEN F IS MoveRightFast;
+        RULE 8 : IF theta IS Up AND theta_dot IS ClockwiseVeryFast THEN F IS MoveRightVeryFast;
+        RULE 9 : IF theta IS UpRight AND theta_dot IS Clockwise THEN F IS MoveRightFast;
+        RULE 10 : IF theta IS UpRight AND theta_dot IS ClockwiseFast THEN F IS MoveRightVeryFast;
+        RULE 11 : IF theta IS UpLeft AND theta_dot IS Counterclockwise THEN F IS MoveLeftFast;
+        RULE 12 : IF theta IS UpLeft AND theta_dot IS CounterclockwiseFast THEN F IS MoveLeftVeryFast;
+    END_RULEBLOCK
+
+END_FUNCTION_BLOCK
