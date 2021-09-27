@@ -6,4 +6,4 @@ of "Computational Intelligence".
 - [x] Assignment 1 - Gradient Descent, Neural Networks
 - [x] Assignment 2 - Kohonen, Radial Basis Functions
 - [x] Assignment 3 - Hopefield, Fuzzy logic 
-- [x] Assignment 4 - Genetics algorithms
+- [x] Assignment 4 - Genetic algorithms
